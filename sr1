@@ -1,0 +1,308 @@
+const fadeJs = document.createElement("script");
+fadeJs.setAttribute("src", "https://kunversion-frontend-custom.s3.amazonaws.com/components/fade/ps.js");
+fadeJs.setAttribute("type", "text/javascript");
+document.head.appendChild(fadeJs);
+document.addEventListener("DOMContentLoaded", function () {
+  const kv = account_info;
+  const entityName = account_info.entityname;
+  const tagline = account_info.websitetagline;
+  const company = account_info.website_owner_type === "company";
+  const office = account_info.website_owner_type === "entity" && kv.is_team_site === false;
+  const team = account_info.website_owner_type === "entity" && kv.is_team_site === true;
+  const agent = account_info.website_owner_type === "user";
+  const agentFullName = kv.agentfirstname + " " + kv.agentlastname;
+  const agentPhone = kv.agentphone;
+  const title = kv.agenttitle;
+  const visibleNumber = $('#footer .footer-top-left address:first-of-type ~ p[style="margin-top: -1rem"] a').text();
+  const homeCoverTitleOfficeName = $("#home-bodycontent .cover-title-inner .row:nth-child(3)");
+  const hasAgentImage = $(".agent-cover-image").length !== 0;
+  const agentImageSquare = $(".agent-cover-image.no-radius").length !== 0;
+  const t = document.querySelector("#home-bodycontent .custom-top");
+  const b = document.querySelector("#home-bodycontent .custom-bottom");
+  if (company || office || team) {
+    $("#home-bodycontent .cover-title-inner").html(`
+    <div id="cust-hero_wrpr" class="hero-wrapper kvat1">
+     <h1 class="hero-tagline">${entityName}</h1>
+     <p class="center lead">${tagline}</p>
+     <div class="hero-btns">
+       <a href="tel:${visibleNumber}" class="btn btn-primary btn-outline">Call Us Today</a>
+       <a href="/contact.php" class="btn btn-primary btn-outline">Send Message</a>
+     </div>
+    </div>
+    `);
+  } else if (agent) {
+    $("#home-bodycontent .cover-title-inner").html(`
+     <div id="cust-hero_wrpr" class="hero-wrapper kvat1">
+      <h1 class="hero-tagline">${agentFullName}</h1>
+      <p class="center lead">${title}</p>
+      <div class="hero-btns">
+        <a href="tel:${visibleNumber}" class="btn btn-primary btn-outline">Call Me Today</a>
+        <a href="/contact.php" class="btn btn-primary btn-outline">Send Message</a>
+      </div>
+     </div>
+     `);
+    aboutAgent({
+      fallbackText:
+        "I specialize in bringing you the best homes for sale and real estate listings in the area. Whether you are buying a home, selling a home or need help securing a Home Mortgage, I've got you covered. With years of experience in the market, I know how crucial it is for you to find relevant, up-to- date information. The search is over. My website is designed to be your one-stop shop for real estate in the area. ",
+      appendTo: t,
+    });
+    if (kv.testiomonials.length !== 0) {
+      setTestimonials({
+        image: "https://images.unsplash.com/photo-1586227740560-8cf2732c1531?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2161&q=80",
+        imageAlt: "woman at desk",
+        backgroundImage: "",
+        gradientColor: "0,0,0,.05",
+        textColor: "000000",
+        quotes: true,
+        className: "custom-testimonials",
+        numOfItems: 5,
+        onlyFiveStars: false,
+        slidePauseTime: 5000,
+        trim: 350,
+        sectionHeader: `What your Neighbors are Saying`,
+        appendTo: b,
+      });
+    }
+  }
+  $("#home-bodycontent .cover-title-inner").addClass("show");
+  $("#home-bodycontent .page-wrapper > .p-t-3.p-b-3.background-white h1").text("Explore Other Areas");
+  $(".footer-wrapper > .container").append('<div class="p-a-1 center white" style="opacity:0.8"><a href="https://app.kvcore.com/marketplace" class="btn-primary btn-sm">Design by IRE Professional Services</a></div>');
+  const fadedElements = ["#agent-about h2 ~ p", "#home-bodycontent .listings.container", "#home-bodycontent .page-wrapper > .p-t-3.p-b-3.background-white h1", "#home-bodycontent #latest-blogs h1", "#home-bodycontent #latest-blogs .post"];
+  fadedElements.forEach(function (el) {
+    $(el).attr("data-aos", "fade-up");
+  });
+  function aboutAgent(data) {
+    if (kv.agentabout.length > 350) {
+      text_truncate = function (str, length, ending) {
+        if (str.length > length) {
+          return str.substring(0, length - ending.length) + ending;
+        } else {
+          return str;
+        }
+      };
+    }
+    $(`
+    <div id="about-agent" class="p-t-3 p-b-3">
+      <div class="container">
+        <div class="row ${hasAgentImage ? `` : `column-reverse`}">
+          <div ${hasAgentImage ? `class="col-md-6"` : ``}>
+          <div data-aos="fade-left" id="kv-social-wrapper"></div>
+          ${
+            kv.agentphoto.indexOf("nophoto") > -1
+              ? `<div data-aos="fade-left" class="about-agent-image-wrapper ${hasAgentImage ? `` : `hidden`}"><img data-aos="fade-left" loading="lazy" src="${data.fallbackImage}" alt="${data.fallbackAlt}"></div>`
+              : `<div data-aos="fade-left" class="about-agent-image-wrapper ${hasAgentImage ? `` : `hidden`}"><img data-aos="fade-left" loading="lazy" src="${kv.agentphoto}" alt="${kv.agentfirstname} ${kv.agentlastname}"></div>`
+          }
+          </div>
+          <div data-aos="fade-up" ${hasAgentImage ? `class="col-md-6"` : `class="col-md-12 center"`}>
+            <span class="span-accent" data-aos="fade-up">Meet</span>
+              <h2 data-aos="fade-up">${agentFullName}</h2>
+              ${title ? `<span data-aos="fade-up">${title}</span>` : ``}
+              ${
+                kv.agentabout.length > 350
+                  ? `<p data-aos="fade-up">${text_truncate(kv.agentabout, 350, "...")}</p>
+                  <a data-aos="fade-up" href="${kv.agentsite}">Read More</a>`
+                  : kv.agentabout !== ""
+                  ? `<p data-aos="fade-up">${kv.agentabout}</p>`
+                  : `<p data-aos="fade-up">${data.fallbackText}</p>`
+              }
+          </div>
+        </div>
+      </div>
+    </div>
+    `).appendTo(data.appendTo);
+    const socialWrapper = $("#kv-social-wrapper");
+    if (agent) {
+      const aSocial = [
+        {
+          name: "Facebook",
+          color: "#4267B2",
+          link: kv.agentfacebook,
+          icon: "facebook",
+        },
+        {
+          name: "Twitter",
+          color: "#1da1f2",
+          link: kv.agenttwitter,
+          icon: "twitter",
+        },
+        {
+          name: "Instagram",
+          color: "#833AB4",
+          link: kv.agentinstagram,
+          icon: "instagram",
+        },
+        {
+          name: "YouTube",
+          color: "#FF0000",
+          link: kv.agentyoutube,
+          icon: "youtube",
+        },
+        {
+          name: "Pinterest",
+          color: "#E60023",
+          link: kv.agentpinterest,
+          icon: "pinterest",
+        },
+        {
+          name: "Linkedin",
+          color: "#0077b5",
+          link: kv.agentlinkedin,
+          icon: "linkedin",
+        },
+      ];
+      aSocial.forEach((account) => {
+        if (account.link) {
+          $(`<a title="Find me on ${account.name}" href="${account.link}" class="hero-social-link"><i class="fa fa-${account.icon}"></i></a>`).appendTo(socialWrapper);
+        }
+      });
+    }
+  }
+  function setTestimonials(data) {
+    if (kv.testiomonials !== "") {
+      shuffleArray = function shuffle(coreArray) {
+        var ctr = coreArray.length,
+          temp,
+          index;
+        while (ctr > 0) {
+          index = Math.floor(Math.random() * ctr);
+          ctr--;
+          temp = coreArray[ctr];
+          coreArray[ctr] = coreArray[index];
+          coreArray[index] = temp;
+        }
+        return coreArray;
+      };
+      const slideAnimate = $('<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" type="text/css">').appendTo("head");
+      const testimonials = kv.testiomonials;
+      var newArray;
+      if (data.onlyFiveStars === true) {
+        newArray = testimonials.filter((testimonial) => testimonial["rating"] >= 5);
+        if (newArray.length === 0) {
+          console.log("No 5 Star Testimonials Found");
+          return;
+        }
+      } else {
+        newArray = account_info.testiomonials;
+      }
+      if (data.shuffle === true) {
+        shuffleArray(testimonials);
+      }
+      const wrapper = $(
+        `<div id="custom-testimonials" class="p-t-3 p-b-3"><div class="container"><header style="color:${data.textColor}" class="center m-b-1"><h2 data-aos="fade-up">${data.sectionHeader}</h2>${
+          kv.testiomonials.length > 2 ? `<a data-aos="fade-up" style="color:#${data.textColor}" class="btn-block m-b-1" href="/testimonials.php">View All</a>` : ``
+        }</header><div class="row"><div class="col-md-12" id="testimonial-column"></div></div></div></div>`
+      ).appendTo(data.appendTo);
+      const wrapperInner = $(`<div class="custom-testimonials-inner ${kv.testiomonials.length > 2 ? `owl-carousel` : `single`}"></div>`).appendTo("#testimonial-column");
+      newArray.slice(0, data.numOfItems).forEach(function (testimonial) {
+        const author = testimonial["who"];
+        var testimonialText = testimonial["testimonial"];
+        text_truncate = function (str, length, ending) {
+          if (str.length > length) {
+            return str.substring(0, length - ending.length) + ending;
+          } else {
+            return str;
+          }
+        };
+        const testimonialOuter = $(`<div class="custom-testimonial"></div>`);
+        testimonialOuter.appendTo(wrapperInner);
+        const testimonialMeta = $(`<div class="custom-testimonial-meta-data"></div>`);
+        testimonialMeta.appendTo(testimonialOuter);
+        const testimonialContent = $(`<p data-aos="fade-up" style="color:#${data.textColor}">${testimonialText}</p>`);
+        if (data.quotes === true) {
+          testimonialContent.addClass("quotes");
+        }
+        testimonialContent.text(text_truncate(testimonialText, data.trim, "..."));
+        testimonialContent.appendTo(testimonialOuter);
+        const ratingWrapper = $('<div data-aos="fade-up" class="custom-testimonial-rating"></div>');
+        ratingWrapper.appendTo(testimonialOuter);
+        const rating = testimonial["rating"];
+        const testimonialAuthor = $(`<span data-aos="fade-up" class="btn-block"><i class="fa fa-user m-r-1"></i>${author}</span>`);
+        testimonialAuthor.appendTo(testimonialOuter);
+        if (testimonialText.length > data.trim) {
+          const viewMore = $(`<a data-aos="fade-up" style="color:#${data.textColor}" class="btn-block m-b-1" href="/testimonials.php">Read Full Testimonial</a>`);
+          viewMore.insertAfter(testimonialContent);
+        }
+        createStar = function starCreator(num) {
+          for (i = 0; i < num; i++) {
+            $('<i class="fa fa-star visible-star"></i>').appendTo(ratingWrapper);
+          }
+          for (i = num; i < 5; i++) {
+            $('<i class="fa fa-star invisible-star"></i>').appendTo(ratingWrapper);
+          }
+        };
+        if (rating === 1) {
+          createStar(1);
+        } else if (rating === 2) {
+          createStar(2);
+        } else if (rating === 3) {
+          createStar(3);
+        } else if (rating === 4) {
+          createStar(4);
+        } else if (rating === 5) {
+          createStar(5);
+        }
+      });
+    }
+    const testimonialSlider = $(".custom-testimonials-inner.owl-carousel");
+    testimonialSlider.owlCarousel({
+      nav: true,
+      dots: true,
+      mouseDrag: false,
+      touchDrag: false,
+      loop: true,
+      autoplay: true,
+      navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
+      autoplayTimeout: data.slidePauseTime,
+      autoHeight: true,
+      animateOut: "fadeOut",
+      animateIn: "fadeIn",
+      responsive: {
+        0: {
+          items: 1,
+        },
+        600: {
+          items: 1,
+        },
+        1000: {
+          items: 2,
+        },
+        1400: {
+          items: 2,
+        },
+      },
+    });
+    testimonialSlider.on("changed.owl.carousel", function (e) {
+      testimonialSlider.trigger("stop.owl.autoplay");
+      testimonialSlider.trigger("play.owl.autoplay");
+    });
+  }
+  $('<a href="#about-agent" class="hero-arrow"> <div></div> <div></div> </a>').appendTo("#home-bodycontent .cover");
+  // Fade In Elements
+  if (window.location.href.indexOf("?editkey=") > -1) {
+    console.log("Making Website Edits");
+  } else {
+    const aosStyles = document.createElement("link");
+    aosStyles.setAttribute("href", "https://kunversion-frontend-custom.s3.amazonaws.com/components/fade/ps.css");
+    aosStyles.setAttribute("rel", "stylesheet");
+    aosStyles.setAttribute("type", "text/css");
+    aosStyles.setAttribute("id", "aos-styles");
+    document.head.appendChild(aosStyles);
+    setTimeout(function () {
+      AOS.init({
+        duration: 1200,
+        mirror: false,
+        once: true,
+        disable: "mobile",
+      });
+    }, 2000);
+  }
+  // Site Editor Helper Code - Do Not Remove
+  if (window.location.href.indexOf("editkey") > -1) {
+    $(
+      ` `
+    ).appendTo("body#home-bodycontent");
+    $("#close-helper").click(function () {
+      $("#site-editor-helper").addClass("close-helper");
+    });
+  }
+});
